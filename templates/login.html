@@ -3,7 +3,7 @@
 <head>
     <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Index</title>
+    <title>Login</title>
     <link href="//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
     <link href="{{ url_for('static', filename='eportfolio.css') }}" rel="stylesheet">
 </head>
@@ -22,7 +22,7 @@
         <div class="navbar-collapse collapse">
             <ul class="nav navbar-nav">
                 {% if not "username" in session %}
-                <li><a href="{{ url_for('index') }}">Login</a></li>
+                <li><a href="{{ url_for('login') }}">Login</a></li>
                 {% else %}
                 <li><a href="{{ url_for('index') }}">Logout</a></li>
                 {% endif %}
@@ -32,7 +32,6 @@
 </div>
 <div class="container">
     <div class="page-header">
-
         <h1>Login</h1>
     </div>
     {% if msg %}
