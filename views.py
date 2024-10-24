@@ -25,7 +25,7 @@ def login():
         return redirect(url_for("index"))
     msg = session.get("msg")
     session.pop("msg", None)
-    return render_template("login.html", form=form)
+    return render_template("login.html", form=form, msg=msg)
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5010, debug=True)
