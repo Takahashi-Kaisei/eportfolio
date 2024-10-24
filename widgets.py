@@ -4,6 +4,7 @@ from markupsafe import Markup
 
 class ButtonWidget(object):
     input_type = "button"
+
     html_params = staticmethod(html_params)
 
 def __call__(self, field, **kwargs):

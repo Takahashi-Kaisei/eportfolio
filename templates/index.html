@@ -22,7 +22,7 @@
         <div class="navbar-collapse collapse">
             <ul class="nav navbar-nav">
                 {% if not "username" in session %}
-                <li><a href="{{ url_for('index') }}">Login</a></li>
+                <li><a href="{{ url_for('login') }}">Login</a></li>
                 {% else %}
                 <li><a href="{{ url_for('index') }}">Logout</a></li>
                 {% endif %}
