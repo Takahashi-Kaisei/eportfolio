@@ -1,4 +1,4 @@
-from flask import Flask, render_template, url_for
+from flask import Flask, render_template, url_for, redirect, session
 from flask_bootstrap import Bootstrap
 from flask_wtf.csrf import CSRFProtect
 from forms import *
@@ -18,6 +18,13 @@ def index():
 @app.route("/login", methods=["GET", "POST"])
 def login():
     form = LoginForm()
+    if form.validate_on_submit():
+        if form.password.data != "password":
+            session["msg"] = "Username or Password is incorrect."
+            return redirect(url_for("login"))
+        return redirect(url_for("index"))
+    msg = session.get("msg")
+    session.pop("msg", None)
     return render_template("login.html", form=form)
 
 if __name__ == "__main__":
