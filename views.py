@@ -29,5 +29,13 @@ def login():
         return redirect(url_for("index"))
     return render_template("login.html", form=form)
 
+@app.route("/logout", methods=["GET", "POST"])
+def logout():
+    session.pop("username", None) # セッションからusernameを削除
+    session.clear() # セッションをクリア，すべてのセッション情報を削除
+    flash("You have been logged out.", "info") #ここのinfoはBootstrapのalert-info
+    return redirect(url_for("index")) # ログアウト後はindex.htmlにリダイレクト
+
+
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5010, debug=True)
