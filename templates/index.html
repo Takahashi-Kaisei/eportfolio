@@ -25,8 +25,8 @@
                 <li><a href="{{ url_for('login') }}">Login</a></li>
                 {% else %}
                 <li><a href="{{ url_for('addlearn') }}">Add Learn</a></li>
+                <li><a href="{{ url_for('search_learn') }}">Search Learn</a></li>
                 <li><a href="{{ url_for('logout') }}">Logout</a></li> <!--logoutにリンク -->
-
                 {% endif %}
             </ul>
         </div>
@@ -44,6 +44,14 @@
             {% endfor %}
         {% endif %}
     {% endwith %}
+
+    {% if form %}
+    {% for field in form.errors %}
+        {% for error in form.errors[field] %}
+            <div class="alert alert-danger">{{ error }}</div>
+        {% endfor %}
+    {% endfor %}
+    {% endif %}
 
     {% if "username" in session %} <!-- セッションにユーザ名がある場合 -->
                 <p>ようこそ，{{ session["username"] }}さん．ホームページです．</p> <!-- ユーザ名を表示 -->

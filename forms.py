@@ -48,3 +48,25 @@ class AddLearnForm(FlaskForm):
         learn.field = self.learn_field.data
         learn.date = self.learn_date.data
         learn.content = self.learn_content.data
+
+class SearchLearnForm(FlaskForm):
+    itemname = StringField(
+        "learning content",
+        validators = [
+            DataRequired(message="Learning content is required."),
+            length(max=256, message="Learning content should be input within 256 characters."),
+        ]
+    )
+    cancel = ButtonField("Cancel")
+    submit = SubmitField("Search Learning Log")
+
+# ここが違う
+    def copy_from(self, learn):
+        self.learn_field.data = learn.field
+        self.learn_date.data = learn.date
+        self.learn_content.data = learn.content
+
+    def copy_to(self, learn):
+        learn.field = self.learn_field.data
+        learn.date = self.learn_date.data
+        learn.content = self.learn_content.data

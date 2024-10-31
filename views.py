@@ -5,6 +5,7 @@ from forms import *
 from models import *
 import os
 import dataaccess as da
+import pickle
 
 app = Flask(__name__)
 bs = Bootstrap(app)
@@ -55,6 +56,23 @@ def addlearn():
     user = da.search_learn(username=session["username"])
     learn_list = da.search_learn_by_field(user.id) # ユーザーIDによる学習ログの検索
     return render_template("addlearn.html", form=form) #, learn_list=learn_listを後で追加する．
+
+@app.route("/searchlearn", methods=["GET", "POST"])
+def search_learn():
+    if not "username" in session:
+        flash("You need to login first.", "warning")
+        return redirect(url_for("login"))
+    form = SearchLearnForm()
+    if form.validate_on_submit():
+        learn_list = da.search_learn_by_field(form.field.data)
+        session["learn_list"] = pickle.dumps(learn_list)
+        return redirect(url_for("searchlearn"))
+    if "learn_list" in session:
+        learn_list = pickle.loads(session["learn_list"])
+        session.pop("learn_list", None)
+    else:
+        learn_list = da.search_learn_by_field("")
+    return render_template("searchlearn.html", form=form, learn_list=learn_list)
 
 
 if __name__ == "__main__":
