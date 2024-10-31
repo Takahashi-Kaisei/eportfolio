@@ -1,6 +1,16 @@
 import sqlite3
 from models import *
 
+# get_connection
+# create_db
+# auth
+# add_user
+# addlearn
+
+
+
+
+
 def get_connection(autocommit=True):
     if autocommit:
         return sqlite3.connect("education.db")
@@ -15,58 +25,24 @@ def create_db():
         password TEXT NOT NULL
     )
     """
-    query_study = """
-    CREATE TABLE study (
+
+    query_learn = """
+    CREATE TABLE learn (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         user_id INTEGER NOT NULL,
-        institution TEXT NOT NULL,
-        field_of_study TEXT NOT NULL,
-        start_date TEXT NOT NULL,
-        end_date TEXT,
-        FOREIGN KEY(user_id) REFERENCES users(id)
-    )
-    """
-    query_learninglog = """
-    CREATE TABLE learninglog (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        user_id INTEGER NOT NULL,
-        institution TEXT NOT NULL,
-        field_of_study TEXT NOT NULL,
-        content TEXT NOT NULL,
+        field TEXT NOT NULL,
         date TEXT NOT NULL,
-        FOREIGN KEY(user_id) REFERENCES users(id)
-    )
-    """
-    query_achievement = """
-    CREATE TABLE achievement (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        user_id INTEGER NOT NULL,
         content TEXT NOT NULL,
-        start_date TEXT NOT NULL,
-        end_date TEXT,
-        description TEXT,
         FOREIGN KEY(user_id) REFERENCES users(id)
     )
     """
-    query_comment = """
-    CREATE TABLE comment (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        user_id INTEGER NOT NULL,
-        commenter_name TEXT NOT NULL,
-        content TEXT NOT NULL,
-        comment_date TEXT NOT NULL,
-        FOREIGN KEY(user_id) REFERENCES users(id)
-    )
-    """
+
     try:
         conn = get_connection(autocommit=False)
         cur = conn.cursor()
         cur.execute("BEGIN")
         cur.execute(query_user)
-        cur.execute(query_study)
-        cur.execute(query_learninglog)
-        cur.execute(query_achievement)
-        cur.execute(query_comment)
+        cur.execute(query_learn)
         conn.commit()
     except Exception as e:
         print(e.args)
@@ -127,69 +103,12 @@ def add_user(user):
         if conn:
             conn.close()
 
-def add_study(study):
-    query = """
-    INSERT INTO study (user_id, institution, field_of_study, start_date, end_date)
-    VALUES (?, ?, ?, ?, ?) RETURNING id
-    """
-    try:
-        conn = get_connection(autocommit=False)
-        cur = conn.cursor()
-        cur.execute("BEGIN")
-        cur.execute(query, (
-            study.user_id,
-            study.institution,
-            study.field_of_study,
-            study.start_date,
-            study.end_date
-        ))
-        study.id = cur.fetchone()[0]
-        conn.commit()
-        return study
-    except Exception as e:
-        print(e.args)
-        if conn:
-            conn.rollback()
-        return None
-    finally:
-        if cur:
-            cur.close()
-        if conn:
-            conn.close()
 
-def get_studies_by_user(user_id):
+# これがあっているかわからない
+def addlearn(log):
     query = """
-    SELECT * FROM study WHERE user_id = ?
-    """
-    try:
-        conn = get_connection()
-        cur = conn.cursor()
-        cur.execute(query, (user_id,))
-        rows = cur.fetchall()
-        studies = []
-        for row in rows:
-            study = Study()
-            study.id = row[0]
-            study.user_id = row[1]
-            study.institution = row[2]
-            study.field_of_study = row[3]
-            study.start_date = row[4]
-            study.end_date = row[5]
-            studies.append(study)
-        return studies
-    except Exception as e:
-        print(e.args)
-        return []
-    finally:
-        if cur:
-            cur.close()
-        if conn:
-            conn.close()
-
-def add_learninglog(log):
-    query = """
-    INSERT INTO learninglog (user_id, institution, field_of_study, content, date)
-    VALUES (?, ?, ?, ?, ?) RETURNING id
+    INSERT INTO learn (user_id, field, date, content)
+    VALUES (?, ?, ?) RETURNING id
     """
     try:
         conn = get_connection(autocommit=False)
@@ -197,10 +116,9 @@ def add_learninglog(log):
         cur.execute("BEGIN")
         cur.execute(query, (
             log.user_id,
-            log.institution,
-            log.field_of_study,
-            log.content,
-            log.date
+            log.field,
+            log.date,
+            log.content
         ))
         log.id = cur.fetchone()[0]
         conn.commit()
@@ -216,58 +134,25 @@ def add_learninglog(log):
         if conn:
             conn.close()
 
-def get_learninglogs_by_user(user_id):
+def search_learn(username):
     query = """
-    SELECT * FROM learninglog WHERE user_id = ?
+    SELECT * FROM learn WHERE username = ?
     """
     try:
         conn = get_connection()
         cur = conn.cursor()
-        cur.execute(query, (user_id,))
-        rows = cur.fetchall()
-        logs = []
-        for row in rows:
-            log = Learninglog()
-            log.id = row[0]
-            log.user_id = row[1]
-            log.institution = row[2]
-            log.field_of_study = row[3]
-            log.content = row[4]
-            log.date = row[5]
-            logs.append(log)
-        return logs
+        cur.execute(query, (username,))
+        res = cur.fetchall()
+        if res:
+            user = User()
+            user.id = res[0]
+            user.username = res[1]
+            user.password = res[2]
+            return user
+        else:
+            return None
     except Exception as e:
         print(e.args)
-        return []
-    finally:
-        if cur:
-            cur.close()
-        if conn:
-            conn.close()
-
-def add_achievement(achievement):
-    query = """
-    INSERT INTO achievement (user_id, content, start_date, end_date, description)
-    VALUES (?, ?, ?, ?, ?) RETURNING id
-    """
-    try:
-        conn = get_connection(autocommit=False)
-        cur = conn.cursor()
-        cur.execute("BEGIN")
-        cur.execute(query, (
-            achievement.user_id,
-            achievement.content,
-            achievement.start_date,
-            achievement.end_date,
-            achievement.description
-        ))
-        achievement.id = cur.fetchone()[0]
-        conn.commit()
-        return achievement
-    except Exception as e:
-        print(e.args)
-        if conn:
-            conn.rollback()
         return None
     finally:
         if cur:
@@ -275,57 +160,28 @@ def add_achievement(achievement):
         if conn:
             conn.close()
 
-def get_achievements_by_user(user_id):
+
+def search_learn_by_field(field):
     query = """
-    SELECT * FROM achievement WHERE user_id = ?
+    SELECT * FROM learn WHERE learn.field = ?
     """
     try:
         conn = get_connection()
         cur = conn.cursor()
-        cur.execute(query, (user_id,))
-        rows = cur.fetchall()
-        achievements = []
-        for row in rows:
-            achievement = Achievement()
-            achievement.id = row[0]
-            achievement.user_id = row[1]
-            achievement.content = row[2]
-            achievement.start_date = row[3]
-            achievement.end_date = row[4]
-            achievement.description = row[5]
-            achievements.append(achievement)
-        return achievements
+        cur.execute(query, (field,))
+        res = cur.fetchall()
+        learn_list = []
+        for r in res:
+            learn = Learn()
+            learn.id = r[0]
+            learn.user_id = r[1]
+            learn.field = r[2]
+            learn.date = r[3]
+            learn.content = r[4]
+            learn_list.append(learn)
+        return learn_list
     except Exception as e:
         print(e.args)
-        return []
-    finally:
-        if cur:
-            cur.close()
-        if conn:
-            conn.close()
-
-def add_comment(comment):
-    query = """
-    INSERT INTO comment (user_id, commenter_name, content, comment_date)
-    VALUES (?, ?, ?, ?) RETURNING id
-    """
-    try:
-        conn = get_connection(autocommit=False)
-        cur = conn.cursor()
-        cur.execute("BEGIN")
-        cur.execute(query, (
-            comment.user_id,
-            comment.commenter_name,
-            comment.content,
-            comment.comment_date
-        ))
-        comment.id = cur.fetchone()[0]
-        conn.commit()
-        return comment
-    except Exception as e:
-        print(e.args)
-        if conn:
-            conn.rollback()
         return None
     finally:
         if cur:
@@ -333,38 +189,11 @@ def add_comment(comment):
         if conn:
             conn.close()
 
-def get_comments_by_user(user_id):
-    query = """
-    SELECT * FROM comment WHERE user_id = ?
-    """
-    try:
-        conn = get_connection()
-        cur = conn.cursor()
-        cur.execute(query, (user_id,))
-        rows = cur.fetchall()
-        comments = []
-        for row in rows:
-            comment = Comment()
-            comment.id = row[0]
-            comment.user_id = row[1]
-            comment.commenter_name = row[2]
-            comment.content = row[3]
-            comment.comment_date = row[4]
-            comments.append(comment)
-        return comments
-    except Exception as e:
-        print(e.args)
-        return []
-    finally:
-        if cur:
-            cur.close()
-        if conn:
-            conn.close()
 
 if __name__ == "__main__":
     # データベースの作成
     create_db()
-    # ユーザーの追加
+    # ユーザーの一覧．追加．
     user1 = User()
     user1.username = "alice"
     user1.password = "alicepass"
@@ -379,46 +208,19 @@ if __name__ == "__main__":
     auth_user = auth("alice", "alicepass")
     print(auth_user)
 
-    # 学習履歴の追加
-    study = Study()
-    study.user_id = auth_user.id
-    study.institution = "XYZ大学"
-    study.field_of_study = "コンピュータサイエンス"
-    study.start_date = "2020-04-01"
-    study.end_date = "2024-03-31"
-    add_study(study)
-
     # 学習ログの追加
-    log = Learninglog()
+    log = learn()
     log.user_id = auth_user.id
-    log.institution = "XYZ大学"
-    log.field_of_study = "コンピュータサイエンス"
-    log.content = "データベースの勉強をした"
+    log.field = "データベース"
     log.date = "2023-10-01"
-    add_learninglog(log)
-
-    # 実績の追加
-    achievement = Achievement()
-    achievement.user_id = auth_user.id
-    achievement.content = "プログラミングコンテスト優勝"
-    achievement.start_date = "2023-05-01"
-    achievement.end_date = "2023-05-01"
-    achievement.description = "全国プログラミングコンテストで優勝した"
-    add_achievement(achievement)
-
-    # コメントの追加
-    comment = Comment()
-    comment.user_id = auth_user.id
-    comment.commenter_name = "charlie"
-    comment.content = "おめでとうございます！"
-    comment.comment_date = "2023-05-02"
-    add_comment(comment)
+    log.content = "データベースの勉強をした"
+    addlearn(log)
 
     # データの取得テスト
     studies = get_studies_by_user(auth_user.id)
     print(studies)
 
-    logs = get_learninglogs_by_user(auth_user.id)
+    logs = get_learns_by_user(auth_user.id)
     print(logs)
 
     achievements = get_achievements_by_user(auth_user.id)

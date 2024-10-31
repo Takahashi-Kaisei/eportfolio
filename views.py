@@ -26,6 +26,8 @@ def login():
         if user is None:
             flash("Username or Password is incorrect.", "danger")
             return redirect(url_for("login"))
+        session["username"] = user.username
+        # ここにカートとかが入るかもしれない
         return redirect(url_for("index"))
     return render_template("login.html", form=form)
 
@@ -35,6 +37,24 @@ def logout():
     session.clear() # セッションをクリア，すべてのセッション情報を削除
     flash("You have been logged out.", "info") #ここのinfoはBootstrapのalert-info
     return redirect(url_for("index")) # ログアウト後はindex.htmlにリダイレクト
+
+@app.route("/addlearn", methods=["GET", "POST"])
+def addlearn():
+    if not "username" in session:
+        flash("You need to login first.", "warning")
+        return redirect(url_for("login"))
+    form = AddLearnForm()
+    if form.validate_on_submit():
+        learn = Learn()
+        form.copy_to(learn)
+        user = da.search_learn(username=session["username"])
+        learn.user_id = user.id
+        da.addlearn(learn)
+        flash("Learning log has been added.", "info")
+        return redirect(url_for("addlearn"))
+    user = da.search_learn(username=session["username"])
+    learn_list = da.search_learn_by_field(user.id) # ユーザーIDによる学習ログの検索
+    return render_template("addlearn.html", form=form) #, learn_list=learn_listを後で追加する．
 
 
 if __name__ == "__main__":
