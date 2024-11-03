@@ -10,74 +10,66 @@
 <body>
     <div class="navbar navbar-inverse" role="navigation">
         <div class="container">
-        <div class="navbar-header">
-            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
-                <span class="sr-only">Toggle navigation</span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-            </button>
-            <a class="navbar-brand" href="{{ url_for('index') }}">eportfolio</a>
-        </div>
-        <div class="navbar-collapse collapse">
-            <ul class="nav navbar-nav">
-                {% if not "username" in session %}
-                <li><a href="{{ url_for('login') }}">Login</a></li>
-                {% else %}
-                <li><a href="{{ url_for('addlearn') }}">Add Learn</a></li>
-                <li><a href="{{ url_for('search_learn') }}">Search Learn</a></li>
-                <li><a href="{{ url_for('logout') }}">Logout</a></li>
-                {% endif %}
-            </ul>
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="{{ url_for('index') }}">eportfolio</a>
+            </div>
+            <div class="navbar-collapse collapse">
+                <ul class="nav navbar-nav">
+                    {% if not "username" in session %}
+                    <li><a href="{{ url_for('login') }}">Login</a></li>
+                    {% else %}
+                    <li><a href="{{ url_for('addlearn') }}">Add Learn</a></li>
+                    <li><a href="{{ url_for('search_learn') }}">Search Learn</a></li>
+                    <li><a href="{{ url_for('logout') }}">Logout</a></li>
+                    {% endif %}
+                </ul>
+            </div>
         </div>
     </div>
-</div>
 
-<div class="container">
-    <div class="page-header">
-        <h1>Add Learn</h1>
-    </div>
+    <div class="container">
+        <div class="page-header">
+            <h1>Add Learn</h1>
+        </div>
 
-    {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-            {% for category, message in messages %}
-                <div class="alert alert-{{ category }}"> {{ message|capitalize }} </div>
-            {% endfor %}
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}"> {{ message|capitalize }} </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        {% if form %}
+        <form action="{{ url_for('addlearn') }}" method="POST" novalidate class="mb-10">
+            <div class="form-group">
+                <label for="learn_field">{{ form.learn_field.label }}</label>
+                {{ form.learn_field(type="text", id="learn_field", class="form-control", placeholder="Enter the learning field") }}
+            </div>
+            <div class="form-group">
+                <label for="learn_date">{{ form.learn_date.label }}</label>
+                {{ form.learn_date(type="date", id="learn_date", class="form-control", placeholder="Enter the date") }}
+            </div>
+            <div class="form-group">
+                <label for="learn_content">{{ form.learn_content.label }}</label>
+                {{ form.learn_content(type="text", id="learn_content", class="form-control", placeholder="Enter your learning content") }}
+            </div>
+            {{ form.csrf_token }}
+            {{ form.cancel(class="btn") }}
+            {{ form.submit(class="btn btn-primary") }}
+        </form>
         {% endif %}
-    {% endwith %}
+    </div>
 
-    {% if form %}
-        {% for field in form.errors %}
-            {% for error in form.errors[field] %}
-                <div class="alert alert-danger">{{ error }}</div>
-            {% endfor %}
-        {% endfor %}
-    {% endif %}
-
-    {% if form %}
-    <form action="{{ url_for('addlearn') }}" method="POST" novalidate class="mb-10">
-        </div>
-        <div class="form-group">
-            <label for="learn_date">{{ form.learn_date.label }}</label>
-            {{ form.learn_date(type="date", id="learn_date", class="form-control", placeholder="Enter the date") }}
-        </div>
-        <div class="form-group">
-            <label for="learn_content">{{ form.learn_content.label }}</label>
-            {{ form.learn_content(type="text", id="learn_content", class="form-control", placeholder="Enter your learning content") }}
-        </div>
-        {{ form.csrf_token }}
-        {{ form.cancel(class="btn") }}
-        {{ form.submit(class="btn btn-primary") }}
-    </form>
-    {% endif %}
-
-
-
-</div>
-
-<script src="{{ bootstrap_find_resource('jquery.js', cdn='jquery') }}"></script>
-<script src="{{ bootstrap_find_resource('js/bootstrap.js', cdn='bootstrap') }}"></script>
-<script src="{{ url_for('static', filename='eportfolio.js') }}"></script>
+    <script src="{{ bootstrap_find_resource('jquery.js', cdn='jquery') }}"></script>
+    <script src="{{ bootstrap_find_resource('js/bootstrap.js', cdn='bootstrap') }}"></script>
+    <script src="{{ url_for('static', filename='eportfolio.js') }}"></script>
 
 </body>
 </html>
