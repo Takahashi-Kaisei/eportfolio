@@ -29,6 +29,13 @@ class LoginForm(FlaskForm):
         user.password = self.password.data
 
 class AddLearnForm(FlaskForm):
+    learn_date = StringField(
+        "learning date",
+        validators = [
+            DataRequired(message="Learning date is required."),
+            length(max=10, message="Learning date should be input within 10 characters."),
+        ],
+    )
     learn_content = StringField(
         "learning content",
         validators = [

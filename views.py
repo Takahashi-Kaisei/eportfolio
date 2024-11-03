@@ -47,6 +47,7 @@ def addlearn():
     form = AddLearnForm()
     if form.validate_on_submit():
         learn = Learn()
+        print(learn)
         form.copy_to(learn)
         user = da.search_learn(username=session["username"])
         learn.user_id = user.id
@@ -54,7 +55,8 @@ def addlearn():
         flash("Learning log has been added.", "info")
         return redirect(url_for("addlearn"))
     user = da.search_learn(username=session["username"])
-    learn_list = da.search_learn_by_field(user.id) # ユーザーIDによる学習ログの検索
+    learn_list = da.search_learn_by_field(learn.field) # ユーザーIDによる学習ログの検索
+    print(learn_list)
     return render_template("addlearn.html", form=form) #, learn_list=learn_listを後で追加する．
 
 @app.route("/searchlearn", methods=["GET", "POST"])

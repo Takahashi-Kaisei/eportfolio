@@ -108,7 +108,7 @@ def add_user(user):
 def addlearn(log):
     query = """
     INSERT INTO learn (user_id, field, date, content)
-    VALUES (?, ?, ?) RETURNING id
+    VALUES (?, ?, ?, ?) RETURNING id
     """
     try:
         conn = get_connection(autocommit=False)
@@ -134,23 +134,25 @@ def addlearn(log):
         if conn:
             conn.close()
 
-def search_learn(username):
+def search_learn(user_id):
     query = """
-    SELECT * FROM learn WHERE username = ?
+    SELECT * FROM learn WHERE user_id = ?
     """
     try:
         conn = get_connection()
         cur = conn.cursor()
-        cur.execute(query, (username,))
+        cur.execute(query, (user_id,))
         res = cur.fetchall()
-        if res:
-            user = User()
-            user.id = res[0]
-            user.username = res[1]
-            user.password = res[2]
-            return user
-        else:
-            return None
+        learn_list = []
+        for r in res:
+            learn = Learn()
+            learn.id = r[0]
+            learn.user_id = r[1]
+            learn.field = r[2]
+            learn.date = r[3]
+            learn.content = r[4]
+            learn_list.append(learn)
+        return learn_list
     except Exception as e:
         print(e.args)
         return None
@@ -161,14 +163,14 @@ def search_learn(username):
             conn.close()
 
 
-def search_learn_by_field(field):
+def search_learn_by_field(user_id, field):
     query = """
-    SELECT * FROM learn WHERE learn.field = ?
+    SELECT * FROM learn WHERE user_id = ? AND field = ?
     """
     try:
         conn = get_connection()
         cur = conn.cursor()
-        cur.execute(query, (field,))
+        cur.execute(query, (user_id, field))
         res = cur.fetchall()
         learn_list = []
         for r in res:
@@ -209,22 +211,9 @@ if __name__ == "__main__":
     print(auth_user)
 
     # 学習ログの追加
-    log = learn()
+    log = Learn()
     log.user_id = auth_user.id
     log.field = "データベース"
     log.date = "2023-10-01"
     log.content = "データベースの勉強をした"
     addlearn(log)
-
-    # データの取得テスト
-    studies = get_studies_by_user(auth_user.id)
-    print(studies)
-
-    logs = get_learns_by_user(auth_user.id)
-    print(logs)
-
-    achievements = get_achievements_by_user(auth_user.id)
-    print(achievements)
-
-    comments = get_comments_by_user(auth_user.id)
-    print(comments)
