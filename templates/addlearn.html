@@ -3,7 +3,7 @@
 <head>
     <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Index</title>
+    <title>Add Learn</title>
     <link href="//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
     <link href="{{ url_for('static', filename='eportfolio.css') }}" rel="stylesheet">
 </head>
@@ -26,44 +26,58 @@
                 {% else %}
                 <li><a href="{{ url_for('addlearn') }}">Add Learn</a></li>
                 <li><a href="{{ url_for('search_learn') }}">Search Learn</a></li>
-                <li><a href="{{ url_for('logout') }}">Logout</a></li> <!--logoutにリンク -->
+                <li><a href="{{ url_for('logout') }}">Logout</a></li>
                 {% endif %}
             </ul>
         </div>
     </div>
 </div>
+
 <div class="container">
     <div class="page-header">
-        <h1>ePortfolio</h1>
-    {% with messages = get_flashed_messages(with_categories=true) %} <!-- フラッシュメッセージの取得 -->
-        {% if messages %} <!-- メッセージがある場合 -->
-            {% for category, message in messages %} <!-- メッセージを表示 -->
-                <div class="alert alert-{{ category }}"> <!-- カテゴリーによってメッセージの表示色を変える -->
-                    {{ message }} <!-- メッセージの表示 -->
-                </div>
+        <h1>Add Learn</h1>
+    </div>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }}"> {{ message|capitalize }} </div>
             {% endfor %}
         {% endif %}
     {% endwith %}
 
     {% if form %}
-    {% for field in form.errors %}
-        {% for error in form.errors[field] %}
-            <div class="alert alert-danger">{{ error }}</div>
+        {% for field in form.errors %}
+            {% for error in form.errors[field] %}
+                <div class="alert alert-danger">{{ error }}</div>
+            {% endfor %}
         {% endfor %}
-    {% endfor %}
     {% endif %}
 
-    {% if "username" in session %} <!-- セッションにユーザ名がある場合 -->
-                <p>ようこそ，{{ session["username"] }}さん．ホームページです．</p> <!-- ユーザ名を表示 -->
-    {% else %}
-                <p>ログインしてください</p> <!-- ログインしていない場合 -->
+    {% if form %}
+    <form action="{{ url_for('addlearn') }}" method="POST" novalidate class="mb-10">
+        </div>
+        <div class="form-group">
+            <label for="learn_date">{{ form.learn_date.label }}</label>
+            {{ form.learn_date(type="date", id="learn_date", class="form-control", placeholder="Enter the date") }}
+        </div>
+        <div class="form-group">
+            <label for="learn_content">{{ form.learn_content.label }}</label>
+            {{ form.learn_content(type="text", id="learn_content", class="form-control", placeholder="Enter your learning content") }}
+        </div>
+        {{ form.csrf_token }}
+        {{ form.cancel(class="btn") }}
+        {{ form.submit(class="btn btn-primary") }}
+    </form>
     {% endif %}
-    </div>
+
+
+
 </div>
+
 <script src="{{ bootstrap_find_resource('jquery.js', cdn='jquery') }}"></script>
 <script src="{{ bootstrap_find_resource('js/bootstrap.js', cdn='bootstrap') }}"></script>
 <script src="{{ url_for('static', filename='eportfolio.js') }}"></script>
 
 </body>
 </html>
-
