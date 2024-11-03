@@ -1,16 +1,6 @@
 import sqlite3
 from models import *
 
-# get_connection
-# create_db
-# auth
-# add_user
-# addlearn
-
-
-
-
-
 def get_connection(autocommit=True):
     if autocommit:
         return sqlite3.connect("education.db")
@@ -103,8 +93,6 @@ def add_user(user):
         if conn:
             conn.close()
 
-
-# これがあっているかわからない
 def addlearn(log):
     query = """
     INSERT INTO learn (user_id, field, date, content)
@@ -118,7 +106,7 @@ def addlearn(log):
             log.user_id,
             log.field,
             log.date,
-            log.content
+            log.content,
         ))
         log.id = cur.fetchone()[0]
         conn.commit()
@@ -134,7 +122,33 @@ def addlearn(log):
         if conn:
             conn.close()
 
-def search_learn(user_id):
+def search_user_by_username(username):
+    query = """
+    SELECT * FROM users WHERE username = ?
+    """
+    try:
+        conn = get_connection()
+        cur = conn.cursor()
+        cur.execute(query, (username,))
+        res = cur.fetchone()
+        if res:
+            user = User()
+            user.id = res[0]
+            user.username = res[1]
+            user.password = res[2]
+            return user
+        else:
+            return None
+    except Exception as e:
+        print(e.args)
+        return None
+    finally:
+        if cur:
+            cur.close()
+        if conn:
+            conn.close()
+
+def search_learns_by_user(user_id):
     query = """
     SELECT * FROM learn WHERE user_id = ?
     """
@@ -162,15 +176,14 @@ def search_learn(user_id):
         if conn:
             conn.close()
 
-
 def search_learn_by_field(user_id, field):
     query = """
-    SELECT * FROM learn WHERE user_id = ? AND field = ?
+    SELECT * FROM learn WHERE user_id = ? AND field LIKE ?
     """
     try:
         conn = get_connection()
         cur = conn.cursor()
-        cur.execute(query, (user_id, field))
+        cur.execute(query, (user_id, f"%{field}%"))
         res = cur.fetchall()
         learn_list = []
         for r in res:
@@ -191,11 +204,9 @@ def search_learn_by_field(user_id, field):
         if conn:
             conn.close()
 
-
 if __name__ == "__main__":
-    # データベースの作成
     create_db()
-    # ユーザーの一覧．追加．
+
     user1 = User()
     user1.username = "alice"
     user1.password = "alicepass"
@@ -206,11 +217,9 @@ if __name__ == "__main__":
     user2.password = "bobpass"
     add_user(user2)
 
-    # 認証テスト
     auth_user = auth("alice", "alicepass")
     print(auth_user)
 
-    # 学習ログの追加
     log = Learn()
     log.user_id = auth_user.id
     log.field = "データベース"
