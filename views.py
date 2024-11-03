@@ -22,8 +22,7 @@ def index():
 def login():
     form = LoginForm()
     if form.validate_on_submit():
-        if form.password.data != "password":
-            user = da.auth(form.username.data, form.password.data)
+        user = da.auth(form.username.data, form.password.data)
         if user is None:
             flash("Username or Password is incorrect.", "danger")
             return redirect(url_for("login"))
@@ -34,48 +33,47 @@ def login():
 
 @app.route("/logout", methods=["GET", "POST"])
 def logout():
-    session.pop("username", None) # セッションからusernameを削除
-    session.clear() # セッションをクリア，すべてのセッション情報を削除
-    flash("You have been logged out.", "info") #ここのinfoはBootstrapのalert-info
-    return redirect(url_for("index")) # ログアウト後はindex.htmlにリダイレクト
+    session.pop("username", None)
+    session.clear()
+    flash("You have been logged out.", "info")
+    return redirect(url_for("index"))
 
 @app.route("/addlearn", methods=["GET", "POST"])
 def addlearn():
-    if not "username" in session:
+    if "username" not in session:
         flash("You need to login first.", "warning")
         return redirect(url_for("login"))
     form = AddLearnForm()
     if form.validate_on_submit():
         learn = Learn()
-        print(learn)
         form.copy_to(learn)
-        user = da.search_learn(username=session["username"])
+        user = da.search_user_by_username(session["username"])
         learn.user_id = user.id
         da.addlearn(learn)
         flash("Learning log has been added.", "info")
         return redirect(url_for("addlearn"))
-    user = da.search_learn(username=session["username"])
-    learn_list = da.search_learn_by_field(learn.field) # ユーザーIDによる学習ログの検索
-    print(learn_list)
-    return render_template("addlearn.html", form=form) #, learn_list=learn_listを後で追加する．
+    user = da.search_user_by_username(session["username"])
+    learn_list = da.search_learns_by_user(user.id)
+    return render_template("addlearn.html", form=form, learn_list=learn_list)
 
 @app.route("/searchlearn", methods=["GET", "POST"])
 def search_learn():
-    if not "username" in session:
+    if "username" not in session:
         flash("You need to login first.", "warning")
         return redirect(url_for("login"))
     form = SearchLearnForm()
     if form.validate_on_submit():
-        learn_list = da.search_learn_by_field(form.field.data)
+        user = da.search_user_by_username(session["username"])
+        learn_list = da.search_learn_by_field(user.id, form.itemname.data)
         session["learn_list"] = pickle.dumps(learn_list)
         return redirect(url_for("searchlearn"))
     if "learn_list" in session:
         learn_list = pickle.loads(session["learn_list"])
         session.pop("learn_list", None)
     else:
-        learn_list = da.search_learn_by_field("")
+        user = da.search_user_by_username(session["username"])
+        learn_list = da.search_learn_by_field(user.id, "")
     return render_template("searchlearn.html", form=form, learn_list=learn_list)
-
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5010, debug=True)

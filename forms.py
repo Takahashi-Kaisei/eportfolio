@@ -8,13 +8,13 @@ class LoginForm(FlaskForm):
         "User Name",
         validators = [
             DataRequired(message="User Name is required."),
-            length(max=64, message="User Name should be input within 64 characters."),
-            ],
-        )
+            length(max=64, message="User Name should be input within 64 characters。"),
+        ],
+    )
     password = PasswordField(
         "Password",
         validators = [
-            DataRequired(message="Password is required."),
+            DataRequired(message="Password is required。"),
         ],
     )
     cancel = ButtonField("Cancel")
@@ -29,6 +29,13 @@ class LoginForm(FlaskForm):
         user.password = self.password.data
 
 class AddLearnForm(FlaskForm):
+    learn_field = StringField(
+        "learning field",  # フィールドの追加
+        validators = [
+            DataRequired(message="Learning field is required."),
+            length(max=64, message="Learning field should be input within 64 characters."),
+        ],
+    )
     learn_date = StringField(
         "learning date",
         validators = [
@@ -66,14 +73,3 @@ class SearchLearnForm(FlaskForm):
     )
     cancel = ButtonField("Cancel")
     submit = SubmitField("Search Learning Log")
-
-# ここが違う
-    def copy_from(self, learn):
-        self.learn_field.data = learn.field
-        self.learn_date.data = learn.date
-        self.learn_content.data = learn.content
-
-    def copy_to(self, learn):
-        learn.field = self.learn_field.data
-        learn.date = self.learn_date.data
-        learn.content = self.learn_content.data
